@@ -12,6 +12,12 @@ const config_1 = require("@nestjs/config");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const prisma_module_1 = require("./prisma/prisma.module");
+const auth_module_1 = require("./modules/auth/auth.module");
+const user_module_1 = require("./modules/user/user.module");
+const address_module_1 = require("./modules/address/address.module");
+const slot_module_1 = require("./modules/slot/slot.module");
+const public_module_1 = require("./modules/public/public.module");
+const menu_module_1 = require("./modules/menu/menu.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -22,6 +28,12 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
             }),
             prisma_module_1.PrismaModule,
+            auth_module_1.AuthModule,
+            user_module_1.UserModule,
+            address_module_1.AddressModule,
+            slot_module_1.SlotModule,
+            public_module_1.PublicModule,
+            menu_module_1.MenuModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

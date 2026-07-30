@@ -35,10 +35,8 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcrypt"));
-const pg_1 = require("pg");
-const adapter_pg_1 = require("@prisma/adapter-pg");
-const pool = new pg_1.Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new adapter_pg_1.PrismaPg(pool);
+const adapter_mariadb_1 = require("@prisma/adapter-mariadb");
+const adapter = new adapter_mariadb_1.PrismaMariaDb(process.env.DATABASE_URL);
 const prisma = new client_1.PrismaClient({ adapter });
 async function main() {
     const hashedPassword = await bcrypt.hash('Password123!', 10);
