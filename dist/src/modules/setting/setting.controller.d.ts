@@ -13,6 +13,8 @@ export declare class SettingController {
             kitchenLatitude: number | null;
             kitchenLongitude: number | null;
             maxRadiusKm: number | null;
+            baseDeliveryFee: import("@prisma/client-runtime-utils").Decimal | null;
+            feePerKm: import("@prisma/client-runtime-utils").Decimal | null;
         };
     }>;
     updateSettings(updateSettingDto: UpdateSettingDto): Promise<{
@@ -25,6 +27,8 @@ export declare class SettingController {
             kitchenLatitude: number | null;
             kitchenLongitude: number | null;
             maxRadiusKm: number | null;
+            baseDeliveryFee: import("@prisma/client-runtime-utils").Decimal | null;
+            feePerKm: import("@prisma/client-runtime-utils").Decimal | null;
         };
     }>;
 }

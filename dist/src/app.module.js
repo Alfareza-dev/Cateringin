@@ -19,6 +19,8 @@ const slot_module_1 = require("./modules/slot/slot.module");
 const public_module_1 = require("./modules/public/public.module");
 const menu_module_1 = require("./modules/menu/menu.module");
 const setting_module_1 = require("./modules/setting/setting.module");
+const cart_module_1 = require("./modules/cart/cart.module");
+const subscription_module_1 = require("./modules/subscription/subscription.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -36,6 +38,8 @@ exports.AppModule = AppModule = __decorate([
             public_module_1.PublicModule,
             menu_module_1.MenuModule,
             setting_module_1.SettingModule,
+            cart_module_1.CartModule,
+            subscription_module_1.SubscriptionModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

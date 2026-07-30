@@ -19,6 +19,7 @@ enum DeliveryMethod {
 }
 
 enum SubscriptionStatus {
+  PENDING_PAYMENT
   ACTIVE
   PAUSED
   COMPLETED
@@ -93,51 +94,51 @@ model DeliverySlot {
 }
 
 model Menu {
-  id            String                @id @default(uuid())
-  name          String
-  description   String                @db.Text
-  imageUrl      String?
-  price         Decimal               @db.Decimal(10, 2)
-  calories      Int?
-  dietaryTags   Json
-  isActive      Boolean               @default(true)
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
-  schedules     DailyMenuSchedule[]
-  orderItems    OrderItem[]
+  id          String              @id @default(uuid())
+  name        String
+  description String              @db.Text
+  imageUrl    String?
+  price       Decimal             @db.Decimal(10, 2)
+  calories    Int?
+  dietaryTags Json
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  schedules   DailyMenuSchedule[]
+  orderItems  OrderItem[]
 }
 
 model DailyMenuSchedule {
   id        String   @id @default(uuid())
-  menuId    String   
+  menuId    String
   menu      Menu     @relation(fields: [menuId], references: [id])
   date      DateTime @db.Date
   createdAt DateTime @default(now())
 }
 
 model Subscription {
-  id              String             @id @default(uuid())
-  userId          String             
-  user            User               @relation(fields: [userId], references: [id])
-  durationDays    Int
-  startDate       DateTime           @db.Date
-  endDate         DateTime           @db.Date
-  remainingDays   Int
-  status          SubscriptionStatus @default(ACTIVE)
-  deliveryMethod  DeliveryMethod     @default(DELIVERY)
-  addressId       String?            
-  address         Address?           @relation(fields: [addressId], references: [id])
-  slotId          String             
-  slot            DeliverySlot       @relation(fields: [slotId], references: [id])
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  skips           SubscriptionSkip[]
-  orders          Order[]
+  id             String             @id @default(uuid())
+  userId         String
+  user           User               @relation(fields: [userId], references: [id])
+  durationDays   Int
+  startDate      DateTime           @db.Date
+  endDate        DateTime           @db.Date
+  remainingDays  Int
+  status         SubscriptionStatus @default(ACTIVE)
+  deliveryMethod DeliveryMethod     @default(DELIVERY)
+  addressId      String?
+  address        Address?           @relation(fields: [addressId], references: [id])
+  slotId         String
+  slot           DeliverySlot       @relation(fields: [slotId], references: [id])
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  skips          SubscriptionSkip[]
+  orders         Order[]
 }
 
 model SubscriptionSkip {
   id             String       @id @default(uuid())
-  subscriptionId String       
+  subscriptionId String
   subscription   Subscription @relation(fields: [subscriptionId], references: [id])
   skipDate       DateTime     @db.Date
   status         SkipStatus   @default(PENDING)
@@ -148,14 +149,14 @@ model SubscriptionSkip {
 model Order {
   id               String         @id @default(uuid())
   orderNumber      String         @unique
-  userId           String         
+  userId           String
   user             User           @relation(fields: [userId], references: [id])
-  subscriptionId   String?        
+  subscriptionId   String?
   subscription     Subscription?  @relation(fields: [subscriptionId], references: [id])
   deliveryMethod   DeliveryMethod
-  addressId        String?        
+  addressId        String?
   address          Address?       @relation(fields: [addressId], references: [id])
-  slotId           String         
+  slotId           String
   slot             DeliverySlot   @relation(fields: [slotId], references: [id])
   status           OrderStatus    @default(PENDING_PAYMENT)
   subtotal         Decimal        @db.Decimal(10, 2)
@@ -174,9 +175,9 @@ model Order {
 
 model OrderItem {
   id           String  @id @default(uuid())
-  orderId      String  
+  orderId      String
   order        Order   @relation(fields: [orderId], references: [id])
-  menuId       String  
+  menuId       String
   menu         Menu    @relation(fields: [menuId], references: [id])
   price        Decimal @db.Decimal(10, 2)
   quantity     Int
@@ -184,24 +185,24 @@ model OrderItem {
 }
 
 model Payment {
-  id                  String        @id @default(uuid())
-  orderId             String        @unique 
-  order               Order         @relation(fields: [orderId], references: [id])
-  louvinInvoiceId     String?       @unique
-  louvinPaymentUrl    String?
-  amount              Decimal       @db.Decimal(10, 2)
-  status              PaymentStatus @default(PENDING)
-  rawCallbackPayload  Json?
-  paidAt              DateTime?
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  id                 String        @id @default(uuid())
+  orderId            String        @unique
+  order              Order         @relation(fields: [orderId], references: [id])
+  louvinInvoiceId    String?       @unique
+  louvinPaymentUrl   String?
+  amount             Decimal       @db.Decimal(10, 2)
+  status             PaymentStatus @default(PENDING)
+  rawCallbackPayload Json?
+  paidAt             DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 }
 
 model Review {
   id        String   @id @default(uuid())
-  orderId   String   @unique 
+  orderId   String   @unique
   order     Order    @relation(fields: [orderId], references: [id])
-  userId    String   
+  userId    String
   user      User     @relation(fields: [userId], references: [id])
   rating    Int
   comment   String?  @db.Text
@@ -214,5 +215,7 @@ model SystemSetting {
   kitchenLatitude  Float?
   kitchenLongitude Float?
   maxRadiusKm      Float?
+  baseDeliveryFee  Decimal? @db.Decimal(10, 2)
+  feePerKm         Decimal? @db.Decimal(10, 2)
   updatedAt        DateTime @updatedAt
 }

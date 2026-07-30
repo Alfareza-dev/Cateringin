@@ -10,6 +10,8 @@ import { SlotModule } from './modules/slot/slot.module';
 import { PublicModule } from './modules/public/public.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { SettingModule } from './modules/setting/setting.module';
+import { CartModule } from './modules/cart/cart.module';
+import { SubscriptionModule } from './modules/subscription/subscription.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { SettingModule } from './modules/setting/setting.module';
     PublicModule,
     MenuModule,
     SettingModule,
+    CartModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
