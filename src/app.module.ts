@@ -9,6 +9,7 @@ import { AddressModule } from './modules/address/address.module';
 import { SlotModule } from './modules/slot/slot.module';
 import { PublicModule } from './modules/public/public.module';
 import { MenuModule } from './modules/menu/menu.module';
+import { SettingModule } from './modules/setting/setting.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { MenuModule } from './modules/menu/menu.module';
     SlotModule,
     PublicModule,
     MenuModule,
+    SettingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

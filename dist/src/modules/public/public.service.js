@@ -86,9 +86,13 @@ let PublicService = class PublicService {
     }
     async checkCoverage(coverageCheckDto) {
         const { latitude, longitude } = coverageCheckDto;
-        const kitchenLat = this.configService.get('KITCHEN_LATITUDE') || -7.9666;
-        const kitchenLon = this.configService.get('KITCHEN_LONGITUDE') || 112.6326;
-        const maxRadiusKm = this.configService.get('MAX_RADIUS_KM') || 15;
+        const setting = await this.prisma.systemSetting.findUnique({ where: { id: 1 } });
+        if (!setting || setting.kitchenLatitude == null || setting.kitchenLongitude == null || setting.maxRadiusKm == null) {
+            throw new common_1.BadRequestException('Delivery service is currently not configured by the admin.');
+        }
+        const kitchenLat = setting.kitchenLatitude;
+        const kitchenLon = setting.kitchenLongitude;
+        const maxRadiusKm = setting.maxRadiusKm;
         const distanceKm = this.calculateHaversineDistance(kitchenLat, kitchenLon, latitude, longitude);
         return {
             isCovered: distanceKm <= maxRadiusKm,

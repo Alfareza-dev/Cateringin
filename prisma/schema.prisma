@@ -208,3 +208,11 @@ model Review {
   photoUrl  String?
   createdAt DateTime @default(now())
 }
+
+model SystemSetting {
+  id               Int      @id @default(1)
+  kitchenLatitude  Float?
+  kitchenLongitude Float?
+  maxRadiusKm      Float?
+  updatedAt        DateTime @updatedAt
+}

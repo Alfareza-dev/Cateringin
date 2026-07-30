@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CoverageCheckDto } from './dto/coverage-check.dto';
@@ -86,9 +86,15 @@ export class PublicService {
   async checkCoverage(coverageCheckDto: CoverageCheckDto) {
     const { latitude, longitude } = coverageCheckDto;
 
-    const kitchenLat = this.configService.get<number>('KITCHEN_LATITUDE') || -7.9666;
-    const kitchenLon = this.configService.get<number>('KITCHEN_LONGITUDE') || 112.6326;
-    const maxRadiusKm = this.configService.get<number>('MAX_RADIUS_KM') || 15;
+    const setting = await this.prisma.systemSetting.findUnique({ where: { id: 1 } });
+    
+    if (!setting || setting.kitchenLatitude == null || setting.kitchenLongitude == null || setting.maxRadiusKm == null) {
+      throw new BadRequestException('Delivery service is currently not configured by the admin.');
+    }
+
+    const kitchenLat = setting.kitchenLatitude;
+    const kitchenLon = setting.kitchenLongitude;
+    const maxRadiusKm = setting.maxRadiusKm;
 
     const distanceKm = this.calculateHaversineDistance(
       kitchenLat,
