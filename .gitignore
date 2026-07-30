@@ -9,3 +9,7 @@ node_modules
 .agents
 .claude
 .windsurf
+
+# Compiled output
+dist
+dist/
