@@ -1,0 +1,18 @@
+import { Injectable, OnModuleInit, INestApplication } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+import { createPool } from 'mariadb';
+import { PrismaMariadb } from '@prisma/adapter-mariadb';
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit {
+  constructor() {
+    const pool = createPool({
+      // We must pass the DB URL or separate parameters
+      // Let's use the URL directly, mariadb pool accepts connection string?
+      // Wait, let's just pass process.env.DATABASE_URL or we might need to parse it?
+      // Wait, mariadb createPool doesn't accept a URI string in the same way pg does.
+      // Actually `createPool(process.env.DATABASE_URL)` is supported in `mariadb`.
+    });
+    // Ah wait, let's check Prisma docs or the skill output for `mariadb` initialization.
+  }
+}

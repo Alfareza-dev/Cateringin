@@ -1,0 +1,11 @@
+import { Injectable, OnModuleInit, INestApplication } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+import * as mysql from 'mysql2/promise';
+import { PrismaTiDB } from '@prisma/adapter-tidb'; // Wait, mysql2 works with adapter-tidb? Wait, what is the mysql adapter?
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit {
+  constructor() {
+    super(); // let's see if this works
+  }
+}
