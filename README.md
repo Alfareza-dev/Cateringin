@@ -93,5 +93,5 @@ npm run test:cov
 ```
 
 ## Lisensi & Kredit (License & Authors)
-- **Lisensi:** UNLICENSED (Proyek Privat)
+- **Lisensi:** UNLICENSED 
 - **Authors:** Cateringin Team
