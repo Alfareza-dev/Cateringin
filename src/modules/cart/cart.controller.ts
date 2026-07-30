@@ -1,5 +1,18 @@
-import { Body, Controller, Post, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CartService } from './cart.service';
 import { CalculateCartDto } from './dto/calculate-cart.dto';
@@ -16,7 +29,10 @@ export class CartController {
   @ApiOperation({ summary: 'Calculate subscription price and delivery fee' })
   @ApiResponse({ status: 200, description: 'Calculation successful' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  async calculate(@Body() calculateCartDto: CalculateCartDto, @Request() req: any) {
+  async calculate(
+    @Body() calculateCartDto: CalculateCartDto,
+    @Request() req: any,
+  ) {
     const userId = req.user.id;
     const result = await this.cartService.calculate(userId, calculateCartDto);
     return {

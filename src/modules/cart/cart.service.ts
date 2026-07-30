@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CalculateCartDto } from './dto/calculate-cart.dto';
 import { DeliveryMethod } from '@prisma/client';
@@ -10,7 +14,9 @@ export class CartService {
 
   async calculate(userId: string, dto: CalculateCartDto) {
     if (dto.deliveryMethod === DeliveryMethod.DELIVERY && !dto.addressId) {
-      throw new BadRequestException('addressId is required for DELIVERY method');
+      throw new BadRequestException(
+        'addressId is required for DELIVERY method',
+      );
     }
 
     const slot = await this.prisma.deliverySlot.findUnique({
@@ -33,7 +39,9 @@ export class CartService {
 
       const setting = await this.prisma.systemSetting.findFirst();
       if (!setting || !setting.kitchenLatitude || !setting.kitchenLongitude) {
-        throw new BadRequestException('Kitchen location is not configured by admin');
+        throw new BadRequestException(
+          'Kitchen location is not configured by admin',
+        );
       }
 
       distanceKm = this.calculateHaversineDistance(
@@ -44,10 +52,14 @@ export class CartService {
       );
 
       if (setting.maxRadiusKm && distanceKm > setting.maxRadiusKm) {
-        throw new BadRequestException(`Delivery address exceeds maximum radius of ${setting.maxRadiusKm} km`);
+        throw new BadRequestException(
+          `Delivery address exceeds maximum radius of ${setting.maxRadiusKm} km`,
+        );
       }
 
-      const baseFee = setting.baseDeliveryFee ? Number(setting.baseDeliveryFee) : 5000;
+      const baseFee = setting.baseDeliveryFee
+        ? Number(setting.baseDeliveryFee)
+        : 5000;
       const feePerKm = setting.feePerKm ? Number(setting.feePerKm) : 2000;
 
       dailyDeliveryFee = baseFee + distanceKm * feePerKm;
@@ -60,10 +72,13 @@ export class CartService {
       where: { isActive: true },
       select: { price: true },
     });
-    
+
     let fallbackPrice = 0;
     if (activeMenus.length > 0) {
-      const sum = activeMenus.reduce((acc, menu) => acc + Number(menu.price), 0);
+      const sum = activeMenus.reduce(
+        (acc, menu) => acc + Number(menu.price),
+        0,
+      );
       fallbackPrice = sum / activeMenus.length;
     }
 
@@ -94,14 +109,22 @@ export class CartService {
     };
   }
 
-  private calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateHaversineDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const toRad = (value: number) => (value * Math.PI) / 180;
-    const R = 6371; 
+    const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

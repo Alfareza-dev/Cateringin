@@ -1,5 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsBooleanString, IsInt, Min } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsBooleanString,
+  IsInt,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class GetMenuFilterDto {

@@ -1,9 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DeliveryMethod } from '@prisma/client';
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Min, ValidateIf } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+  ValidateIf,
+} from 'class-validator';
 
 export class CalculateCartDto {
-  @ApiProperty({ description: 'Duration of the subscription in days', example: 5 })
+  @ApiProperty({
+    description: 'Duration of the subscription in days',
+    example: 5,
+  })
   @IsInt()
   @Min(1)
   @IsNotEmpty()
@@ -14,7 +26,10 @@ export class CalculateCartDto {
   @IsNotEmpty()
   deliveryMethod: DeliveryMethod;
 
-  @ApiProperty({ description: 'Address ID required if deliveryMethod is DELIVERY', required: false })
+  @ApiProperty({
+    description: 'Address ID required if deliveryMethod is DELIVERY',
+    required: false,
+  })
   @ValidateIf((o) => o.deliveryMethod === DeliveryMethod.DELIVERY)
   @IsUUID()
   @IsNotEmpty()
@@ -25,7 +40,10 @@ export class CalculateCartDto {
   @IsNotEmpty()
   slotId: string;
 
-  @ApiProperty({ description: 'Subscription start date (YYYY-MM-DD)', example: '2026-08-01' })
+  @ApiProperty({
+    description: 'Subscription start date (YYYY-MM-DD)',
+    example: '2026-08-01',
+  })
   @IsString()
   @IsNotEmpty()
   startDate: string;

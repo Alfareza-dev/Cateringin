@@ -39,7 +39,9 @@ export class UserService {
 
     if (newPassword) {
       if (!oldPassword) {
-        throw new BadRequestException('oldPassword is required when updating password');
+        throw new BadRequestException(
+          'oldPassword is required when updating password',
+        );
       }
 
       const user = await this.prisma.user.findUnique({ where: { id: userId } });

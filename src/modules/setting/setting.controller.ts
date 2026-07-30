@@ -19,13 +19,23 @@ export class SettingController {
   @ApiOperation({ summary: 'Get current system settings' })
   async getSettings() {
     const data = await this.settingService.getSettings();
-    return { success: true, statusCode: 200, message: 'Settings retrieved successfully', data };
+    return {
+      success: true,
+      statusCode: 200,
+      message: 'Settings retrieved successfully',
+      data,
+    };
   }
 
   @Patch()
   @ApiOperation({ summary: 'Update system settings' })
   async updateSettings(@Body() updateSettingDto: UpdateSettingDto) {
     const data = await this.settingService.updateSettings(updateSettingDto);
-    return { success: true, statusCode: 200, message: 'Settings updated successfully', data };
+    return {
+      success: true,
+      statusCode: 200,
+      message: 'Settings updated successfully',
+      data,
+    };
   }
 }

@@ -1,4 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAddressDto {
@@ -17,7 +23,7 @@ export class CreateAddressDto {
   @IsOptional()
   note?: string;
 
-  @ApiProperty({ example: -6.200000 })
+  @ApiProperty({ example: -6.2 })
   @IsNumber()
   @IsNotEmpty()
   latitude: number;

@@ -8,12 +8,7 @@ import { JwtStrategy } from '../../common/strategies/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [
-    ConfigModule,
-    PrismaModule,
-    PassportModule,
-    JwtModule.register({}),
-  ],
+  imports: [ConfigModule, PrismaModule, PassportModule, JwtModule.register({})],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })

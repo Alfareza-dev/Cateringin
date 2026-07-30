@@ -12,7 +12,10 @@ export class UpdateSettingDto {
   @IsOptional()
   kitchenLongitude?: number;
 
-  @ApiPropertyOptional({ example: 15, description: 'Maximum Delivery Radius in km' })
+  @ApiPropertyOptional({
+    example: 15,
+    description: 'Maximum Delivery Radius in km',
+  })
   @IsNumber()
   @IsOptional()
   maxRadiusKm?: number;

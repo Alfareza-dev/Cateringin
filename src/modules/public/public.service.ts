@@ -39,7 +39,7 @@ export class PublicService {
 
   async getSchedules(filterDto: GetScheduleFilterDto) {
     const { startDate, endDate } = filterDto;
-    
+
     const where: any = {
       menu: {
         isActive: true,
@@ -64,14 +64,17 @@ export class PublicService {
       orderBy: { date: 'asc' },
     });
 
-    const grouped = schedules.reduce((acc, curr) => {
-      const dateKey = curr.date.toISOString().split('T')[0];
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(curr);
-      return acc;
-    }, {} as Record<string, typeof schedules>);
+    const grouped = schedules.reduce(
+      (acc, curr) => {
+        const dateKey = curr.date.toISOString().split('T')[0];
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(curr);
+        return acc;
+      },
+      {} as Record<string, typeof schedules>,
+    );
 
     return grouped;
   }
@@ -86,10 +89,19 @@ export class PublicService {
   async checkCoverage(coverageCheckDto: CoverageCheckDto) {
     const { latitude, longitude } = coverageCheckDto;
 
-    const setting = await this.prisma.systemSetting.findUnique({ where: { id: 1 } });
-    
-    if (!setting || setting.kitchenLatitude == null || setting.kitchenLongitude == null || setting.maxRadiusKm == null) {
-      throw new BadRequestException('Delivery service is currently not configured by the admin.');
+    const setting = await this.prisma.systemSetting.findUnique({
+      where: { id: 1 },
+    });
+
+    if (
+      !setting ||
+      setting.kitchenLatitude == null ||
+      setting.kitchenLongitude == null ||
+      setting.maxRadiusKm == null
+    ) {
+      throw new BadRequestException(
+        'Delivery service is currently not configured by the admin.',
+      );
     }
 
     const kitchenLat = setting.kitchenLatitude;
@@ -110,16 +122,23 @@ export class PublicService {
     };
   }
 
-  private calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateHaversineDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const R = 6371; // Earth radius in km
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);
-    
+
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      
+      Math.cos(this.deg2rad(lat1)) *
+        Math.cos(this.deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in km
   }

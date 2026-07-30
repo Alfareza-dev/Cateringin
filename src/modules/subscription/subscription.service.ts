@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { SkipDayDto } from './dto/skip-day.dto';
@@ -17,11 +21,16 @@ export class SubscriptionService {
 
   async create(userId: string, dto: CreateSubscriptionDto) {
     if (dto.deliveryMethod === DeliveryMethod.DELIVERY && !dto.addressId) {
-      throw new BadRequestException('addressId is required for DELIVERY method');
+      throw new BadRequestException(
+        'addressId is required for DELIVERY method',
+      );
     }
 
     const start = dayjs.tz(dto.startDate, 'Asia/Jakarta').startOf('day');
-    const tomorrow = dayjs.tz(new Date(), 'Asia/Jakarta').add(1, 'day').startOf('day');
+    const tomorrow = dayjs
+      .tz(new Date(), 'Asia/Jakarta')
+      .add(1, 'day')
+      .startOf('day');
 
     if (start.isBefore(tomorrow)) {
       throw new BadRequestException('Start date must be at least tomorrow');
@@ -34,7 +43,7 @@ export class SubscriptionService {
       throw new NotFoundException('Delivery slot not found or inactive');
     }
 
-    // Capacity checking could be complex (requires counting active subscriptions per day). 
+    // Capacity checking could be complex (requires counting active subscriptions per day).
     // For now, basic check on existing subscriptions with the same slot.
     // In a real scenario, we'd check each day's capacity.
     const endDate = start.add(dto.durationDays - 1, 'day');
@@ -94,15 +103,23 @@ export class SubscriptionService {
     const targetDate = dayjs.tz(dto.skipDate, 'Asia/Jakarta').startOf('day');
     this.validateCutOffTime(targetDate.toDate());
 
-    const start = dayjs.tz(subscription.startDate, 'Asia/Jakarta').startOf('day');
+    const start = dayjs
+      .tz(subscription.startDate, 'Asia/Jakarta')
+      .startOf('day');
     const end = dayjs.tz(subscription.endDate, 'Asia/Jakarta').startOf('day');
 
     if (targetDate.isBefore(start) || targetDate.isAfter(end)) {
-      throw new BadRequestException('Skip date must be within subscription period');
+      throw new BadRequestException(
+        'Skip date must be within subscription period',
+      );
     }
 
     const existingSkip = await this.prisma.subscriptionSkip.findFirst({
-      where: { subscriptionId: id, skipDate: targetDate.toDate(), status: SkipStatus.APPROVED },
+      where: {
+        subscriptionId: id,
+        skipDate: targetDate.toDate(),
+        status: SkipStatus.APPROVED,
+      },
     });
     if (existingSkip) {
       throw new BadRequestException('Date is already skipped');
@@ -137,7 +154,9 @@ export class SubscriptionService {
       throw new BadRequestException('Only active subscriptions can be paused');
     }
 
-    const targetDate = dayjs.tz(dto.pauseStartDate, 'Asia/Jakarta').startOf('day');
+    const targetDate = dayjs
+      .tz(dto.pauseStartDate, 'Asia/Jakarta')
+      .startOf('day');
     this.validateCutOffTime(targetDate.toDate());
 
     const updatedSub = await this.prisma.subscription.update({
@@ -178,11 +197,19 @@ export class SubscriptionService {
   }
 
   private validateCutOffTime(targetDate: Date) {
-    const cutOff = dayjs.tz(targetDate, 'Asia/Jakarta').subtract(1, 'day').hour(18).minute(0).second(0).millisecond(0);
+    const cutOff = dayjs
+      .tz(targetDate, 'Asia/Jakarta')
+      .subtract(1, 'day')
+      .hour(18)
+      .minute(0)
+      .second(0)
+      .millisecond(0);
     const now = dayjs.tz(new Date(), 'Asia/Jakarta');
 
     if (now.isAfter(cutOff)) {
-      throw new BadRequestException('Permintaan skip hari gagal: batas waktu maksimal adalah H-1 jam 18:00 WIB.');
+      throw new BadRequestException(
+        'Permintaan skip hari gagal: batas waktu maksimal adalah H-1 jam 18:00 WIB.',
+      );
     }
   }
 }

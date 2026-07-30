@@ -25,7 +25,9 @@ async function bootstrap() {
   // Swagger OpenAPI Config
   const config = new DocumentBuilder()
     .setTitle('Catering Platform API')
-    .setDescription('Backend REST API documentation for Daily Catering & Order System')
+    .setDescription(
+      'Backend REST API documentation for Daily Catering & Order System',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();

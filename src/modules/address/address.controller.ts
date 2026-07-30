@@ -13,7 +13,12 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('addresses')
 @ApiBearerAuth()
@@ -25,13 +30,19 @@ export class AddressController {
   @Post()
   @ApiOperation({ summary: 'Create new address' })
   @ApiResponse({ status: 201, description: 'Address created' })
-  async create(@CurrentUser() user: any, @Body() createAddressDto: CreateAddressDto) {
+  async create(
+    @CurrentUser() user: any,
+    @Body() createAddressDto: CreateAddressDto,
+  ) {
     return this.addressService.create(user.id, createAddressDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all user addresses' })
-  @ApiResponse({ status: 200, description: 'Return addresses ordered by primary first' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return addresses ordered by primary first',
+  })
   async findAll(@CurrentUser() user: any) {
     return this.addressService.findAll(user.id);
   }

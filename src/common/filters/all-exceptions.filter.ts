@@ -14,12 +14,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
-    let data = null;
+    const data = null;
 
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
+
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
       } else if (
@@ -30,7 +30,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           (exceptionResponse as any).message ||
           (exceptionResponse as any).error ||
           'Error';
-        
+
         // Handle class-validator messages which might be arrays
         if (Array.isArray(message)) {
           message = message.join(', ');

@@ -79,7 +79,7 @@ export class AuthService {
       const payload = this.jwtService.verify(refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret',
       });
-      
+
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub },
       });

@@ -1,5 +1,20 @@
-import { Body, Controller, Get, Param, Post, Request, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -19,9 +34,18 @@ export class SubscriptionController {
   @Post('create')
   @Roles(Role.CUSTOMER)
   @ApiOperation({ summary: 'Create a new subscription' })
-  @ApiResponse({ status: 201, description: 'Subscription created successfully' })
-  async create(@Body() createSubscriptionDto: CreateSubscriptionDto, @Request() req: any) {
-    const result = await this.subscriptionService.create(req.user.id, createSubscriptionDto);
+  @ApiResponse({
+    status: 201,
+    description: 'Subscription created successfully',
+  })
+  async create(
+    @Body() createSubscriptionDto: CreateSubscriptionDto,
+    @Request() req: any,
+  ) {
+    const result = await this.subscriptionService.create(
+      req.user.id,
+      createSubscriptionDto,
+    );
     return {
       success: true,
       statusCode: HttpStatus.CREATED,
@@ -60,8 +84,16 @@ export class SubscriptionController {
   @Roles(Role.CUSTOMER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Skip a specific day in the subscription' })
-  async skipDay(@Param('id') id: string, @Body() skipDayDto: SkipDayDto, @Request() req: any) {
-    const result = await this.subscriptionService.skipDay(id, req.user.id, skipDayDto);
+  async skipDay(
+    @Param('id') id: string,
+    @Body() skipDayDto: SkipDayDto,
+    @Request() req: any,
+  ) {
+    const result = await this.subscriptionService.skipDay(
+      id,
+      req.user.id,
+      skipDayDto,
+    );
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -74,8 +106,16 @@ export class SubscriptionController {
   @Roles(Role.CUSTOMER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Pause the subscription' })
-  async pause(@Param('id') id: string, @Body() pauseDto: PauseSubscriptionDto, @Request() req: any) {
-    const result = await this.subscriptionService.pause(id, req.user.id, pauseDto);
+  async pause(
+    @Param('id') id: string,
+    @Body() pauseDto: PauseSubscriptionDto,
+    @Request() req: any,
+  ) {
+    const result = await this.subscriptionService.pause(
+      id,
+      req.user.id,
+      pauseDto,
+    );
     return {
       success: true,
       statusCode: HttpStatus.OK,

@@ -12,6 +12,8 @@ import { MenuModule } from './modules/menu/menu.module';
 import { SettingModule } from './modules/setting/setting.module';
 import { CartModule } from './modules/cart/cart.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { PaymentModule } from './modules/payment/payment.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
     SettingModule,
     CartModule,
     SubscriptionModule,
+    PaymentModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

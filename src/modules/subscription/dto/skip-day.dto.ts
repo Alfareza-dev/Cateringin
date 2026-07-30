@@ -2,7 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class SkipDayDto {
-  @ApiProperty({ description: 'Date to skip (YYYY-MM-DD)', example: '2026-08-05' })
+  @ApiProperty({
+    description: 'Date to skip (YYYY-MM-DD)',
+    example: '2026-08-05',
+  })
   @IsString()
   @IsNotEmpty()
   skipDate: string;

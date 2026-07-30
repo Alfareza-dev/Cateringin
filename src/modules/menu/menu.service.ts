@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
@@ -19,7 +23,7 @@ export class MenuService {
 
   async findAll(filterDto: GetMenuFilterDto) {
     const { search, isActive, page = 1, limit = 10 } = filterDto;
-    
+
     const where: any = {};
     if (search) {
       where.name = { contains: search };
@@ -107,12 +111,12 @@ export class MenuService {
 
   async bulkScheduleMenus(bulkDto: BulkCreateMenuScheduleDto) {
     const { menuIds, dates } = bulkDto;
-    
+
     // Verify all menus exist
     const menus = await this.prisma.menu.findMany({
       where: { id: { in: menuIds } },
     });
-    
+
     if (menus.length !== menuIds.length) {
       throw new NotFoundException('One or more menus not found');
     }
@@ -130,13 +134,20 @@ export class MenuService {
     const allExisting = await this.prisma.dailyMenuSchedule.findMany({
       where: {
         menuId: { in: menuIds },
-        date: { in: dates.map(d => new Date(d)) },
+        date: { in: dates.map((d) => new Date(d)) },
       },
     });
 
-    const existingSet = new Set(allExisting.map(e => `${e.menuId}_${e.date.toISOString().split('T')[0]}`));
+    const existingSet = new Set(
+      allExisting.map(
+        (e) => `${e.menuId}_${e.date.toISOString().split('T')[0]}`,
+      ),
+    );
 
-    const filteredPayload = payload.filter(p => !existingSet.has(`${p.menuId}_${p.date.toISOString().split('T')[0]}`));
+    const filteredPayload = payload.filter(
+      (p) =>
+        !existingSet.has(`${p.menuId}_${p.date.toISOString().split('T')[0]}`),
+    );
 
     if (filteredPayload.length > 0) {
       await this.prisma.dailyMenuSchedule.createMany({
@@ -152,7 +163,7 @@ export class MenuService {
 
   async getSchedules(filterDto: GetScheduleFilterDto) {
     const { startDate, endDate } = filterDto;
-    
+
     const where: any = {};
     if (startDate && endDate) {
       where.date = {
@@ -174,14 +185,17 @@ export class MenuService {
     });
 
     // Group by date
-    const grouped = schedules.reduce((acc, curr) => {
-      const dateKey = curr.date.toISOString().split('T')[0];
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(curr);
-      return acc;
-    }, {} as Record<string, typeof schedules>);
+    const grouped = schedules.reduce(
+      (acc, curr) => {
+        const dateKey = curr.date.toISOString().split('T')[0];
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(curr);
+        return acc;
+      },
+      {} as Record<string, typeof schedules>,
+    );
 
     return grouped;
   }
