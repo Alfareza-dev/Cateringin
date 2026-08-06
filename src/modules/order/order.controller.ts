@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Get,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -108,6 +109,19 @@ export class OrderController {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'Order completed by Customer',
+      data: result,
+    };
+  }
+
+  @Get('user/orders/:id/tracking')
+  @Roles(Role.CUSTOMER, Role.ADMIN)
+  @ApiOperation({ summary: 'Track order progress and ETA' })
+  async trackOrder(@Param('id') id: string, @Request() req: { user: { id: string, role: string } }) {
+    const result = await this.orderService.trackOrder(id, req.user);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Order tracking details retrieved',
       data: result,
     };
   }

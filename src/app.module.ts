@@ -14,6 +14,10 @@ import { CartModule } from './modules/cart/cart.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { OrderModule } from './modules/order/order.module';
+import { KitchenModule } from './modules/kitchen/kitchen.module';
+import { DriverModule } from './modules/driver/driver.module';
+import { ReviewModule } from './modules/review/review.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { OrderModule } from './modules/order/order.module';
     SubscriptionModule,
     PaymentModule,
     OrderModule,
+    KitchenModule,
+    DriverModule,
+    ReviewModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

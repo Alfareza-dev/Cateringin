@@ -154,7 +154,7 @@ export class OrderService {
       }
 
       // Call Louvin Payment Gateway
-      const transaction: { id: string; qr_string?: string; va_number?: string } = await this.paymentService.createTransaction({
+      const transaction: { id: string; qr_string?: string; va_number?: string; expired_at?: string; total_payment?: number } = await this.paymentService.createTransaction({
         amount: totalPrice,
         payment_type: dto.paymentType,
         customer_name: user.fullName,
@@ -173,10 +173,20 @@ export class OrderService {
         },
       });
 
-      return await prisma.order.findUnique({
+      const savedOrder = await prisma.order.findUnique({
         where: { id: newOrder.id },
         include: { payment: true, items: true },
       });
+
+      return {
+        ...savedOrder,
+        louvinPayment: {
+          qr_string: transaction.qr_string,
+          va_number: transaction.va_number,
+          expired_at: transaction.expired_at,
+          total_payment: transaction.total_payment,
+        },
+      };
     });
 
     return order;
@@ -256,5 +266,55 @@ export class OrderService {
       where: { id },
       data: { status: OrderStatus.COMPLETED },
     });
+  }
+
+  async trackOrder(orderId: string, user: { id: string; role: string }) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        address: true,
+        slot: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (order.userId !== user.id && user.role !== 'ADMIN') {
+      throw new BadRequestException('Unauthorized access to track this order');
+    }
+
+    const settings = await this.prisma.systemSetting.findUnique({ where: { id: 1 } });
+    
+    const trackingData: any = {
+      orderNumber: order.orderNumber,
+      status: order.status,
+      deliveryMethod: order.deliveryMethod,
+      slot: order.slot,
+      statusHistory: [
+        OrderStatus.PENDING_PAYMENT,
+        OrderStatus.PAID,
+        OrderStatus.IN_KITCHEN,
+        OrderStatus.ON_DELIVERY,
+        OrderStatus.DELIVERED,
+        OrderStatus.COMPLETED,
+      ],
+    };
+
+    if (order.deliveryMethod === DeliveryMethod.DELIVERY) {
+      trackingData.address = order.address;
+      trackingData.estimatedArrival = order.estimatedArrival;
+      trackingData.proofOfDelivery = order.proofOfDelivery;
+    } else if (order.deliveryMethod === DeliveryMethod.PICKUP) {
+      trackingData.pickupPin = order.pickupPin;
+      trackingData.kitchenLocation = {
+        latitude: settings?.kitchenLatitude ?? -7.9666,
+        longitude: settings?.kitchenLongitude ?? 112.6326,
+      };
+      trackingData.mapsLink = `https://www.google.com/maps/search/?api=1&query=${trackingData.kitchenLocation.latitude},${trackingData.kitchenLocation.longitude}`;
+    }
+
+    return trackingData;
   }
 }
