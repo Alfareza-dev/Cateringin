@@ -1,147 +1,441 @@
-# Platform Catering Harian & Order System
+# Cateringin — Backend API
 
-Platform Catering Harian & Order System adalah sistem komprehensif yang dirancang untuk mengelola pemesanan katering, penjadwalan, manajemen dapur, dan pelacakan pengiriman. Sistem ini memisahkan secara jelas akses dan fitur berdasarkan peran pengguna untuk memastikan efisiensi dan keamanan operasional.
+> **NestJS · Prisma · MySQL · Louvin Payment · Cloudinary**
 
-## 1. Overview Proyek & Tech Stack Utama
+REST API backend untuk platform katering harian. Mengelola pesanan, langganan, pembayaran, dapur (KDS), pengiriman, dan ulasan dengan RBAC 4 role.
 
-Proyek ini dibangun menggunakan arsitektur modern yang skalabel dan mudah dipelihara, baik dari sisi backend maupun integrasi pihak ketiga.
+---
 
-- **Framework Backend:** [NestJS](https://nestjs.com/) (TypeScript) - Menawarkan arsitektur modular yang kuat dan maintainable.
-- **Database & ORM:** PostgreSQL dengan [Prisma ORM](https://www.prisma.io/) - Mengelola relasi data kompleks dengan performa tinggi dan tipe data yang aman (type-safe).
-- **Payment Gateway:** [Louvin Payment Gateway] - Terintegrasi untuk pemrosesan transaksi otomatis, checkout order, dan validasi status pembayaran via webhook.
-- **Dokumentasi API:** [Scalar API Docs] - Dokumentasi API yang interaktif, modern, dan terpusat (dapat diakses pada endpoint `/reference`).
+## Daftar Isi
 
-## 2. Matrix User Roles & Hak Akses
+- [Tech Stack](#tech-stack)
+- [Cara Menjalankan](#cara-menjalankan)
+- [Environment Variables](#environment-variables)
+- [Dokumentasi API (Scalar)](#dokumentasi-api-scalar)
+- [Role & Hak Akses](#role--hak-akses)
+- [Alur Aplikasi](#alur-aplikasi)
+- [Daftar Endpoint API](#daftar-endpoint-api)
+- [Struktur Response](#struktur-response)
+- [Mapping ke Frontend](#mapping-ke-frontend)
+- [Database & Prisma](#database--prisma)
 
-Sistem ini menerapkan Role-Based Access Control (RBAC) yang ketat untuk mengamankan fungsionalitas dan data:
+---
 
-| Role       | Akses & Kemampuan Utama |
-|------------|-------------------------|
-| **PUBLIC** | Mengakses menu aktif, jadwal publik, slot yang tersedia, dan cek jangkauan pengiriman. Tidak memerlukan autentikasi. |
-| **CUSTOMER** | Mendaftar/Login, mengelola profil dan alamat (termasuk alamat utama), melihat menu, menghitung keranjang, checkout pesanan, membuat dan mengelola langganan (pause, resume, skip day), melacak pesanan, dan memberikan ulasan (review). |
-| **ADMIN**  | Mengelola keseluruhan sistem (CRUD): Pengguna/Customer, Slot Waktu, Menu, Jadwal Menu, Settings, memantau Analitik, memperbarui status pesanan secara manual, dan memantau ulasan. |
-| **KITCHEN**| Memantau pesanan dalam *batch view* (KDS), memulai proses memasak, serta mencetak atau melihat label pesanan dan mencetak label pengiriman. Memperbarui status pesanan dari dapur. |
-| **DRIVER** | Melihat daftar pengiriman yang ditugaskan dan memperbarui status pengiriman secara real-time di perjalanan. |
+## Tech Stack
 
-## 3. Pemetaan Sitemap & Page Routing Frontend
+| Layer | Teknologi |
+|---|---|
+| Framework | [NestJS](https://nestjs.com/) (TypeScript) |
+| Database | MySQL via [Prisma ORM](https://www.prisma.io/) |
+| Auth | JWT Access Token + Refresh Token |
+| Payment | [Louvin Payment Gateway](https://louvin.dev) |
+| Storage | [Cloudinary](https://cloudinary.com) (foto menu & bukti kirim) |
+| API Docs | [Scalar](https://scalar.com) (diakses via `/docs`) |
 
-Meskipun sistem backend beroperasi melalui API, berikut adalah rancangan pemetaan sitemap untuk implementasi Frontend:
+---
 
-### Landing Page & Public
-- `/` - Halaman Utama (Hero, Fitur, Testimoni Singkat)
-- `/menus` - Katalog Menu & Jadwal Makanan Harian
-- `/coverage` - Cek Area Pengiriman
-- `/auth/login` - Masuk ke Akun
-- `/auth/register` - Daftar Akun Baru
+## Cara Menjalankan
 
-### Customer Portal (Membutuhkan Login `CUSTOMER`)
-- `/dashboard` - Ringkasan Pesanan & Langganan Aktif
-- `/profile` - Pengaturan Profil & Manajemen Alamat
-- `/cart` - Keranjang Belanja & Kalkulasi Harga
-- `/checkout` - Halaman Pembayaran & Konfirmasi (Integrasi Louvin)
-- `/orders` - Riwayat & Pelacakan Status Pesanan
-- `/subscriptions` - Manajemen Langganan (Pause, Resume, Skip Day)
+```bash
+# 1. Install dependencies
+npm install
 
-### Admin Dashboard (Membutuhkan Login `ADMIN`)
-- `/admin` - Overview & Analitik
-- `/admin/customers` - Manajemen Data Pelanggan
-- `/admin/menus` - CRUD Katalog Menu & Varian
-- `/admin/schedules` - Pengaturan Jadwal Menu Harian
-- `/admin/slots` - Pengaturan Waktu/Slot Pengiriman (Pagi, Siang, Sore)
-- `/admin/orders` - Pemantauan Semua Pesanan & Transaksi
-- `/admin/reviews` - Moderasi Ulasan
-- `/admin/settings` - Konfigurasi Sistem Utama
+# 2. Salin dan isi environment variables
+cp .env.example .env
 
-### Kitchen Display System / KDS (Membutuhkan Login `KITCHEN`)
-- `/kitchen` - Layar Utama KDS (Daftar Antrean Pesanan per Slot/Hari)
-- `/kitchen/batch` - Tampilan Batch Memasak
-- `/kitchen/labels` - Cetak Label Kemasan & Label Pengiriman
+# 3. Generate Prisma client
+npx prisma generate
 
-### Driver View (Membutuhkan Login `DRIVER`)
-- `/driver` - Daftar Tugas Pengiriman Hari Ini
-- `/driver/route` - Panduan Rute & Detail Pengantaran
-- `/driver/deliveries` - Konfirmasi Pengiriman Selesai
+# 4. Jalankan migrasi (saat database sudah siap)
+npx prisma migrate dev
 
-## 4. Daftar Lengkap Endpoint API per Modul
+# 5. Jalankan development server
+npm run start:dev
+```
 
-Sistem menyediakan antarmuka API RESTful. Endpoint dikelompokkan berdasarkan modul dengan otorisasi khusus:
+Server berjalan di: `http://localhost:3000`
+Dokumentasi API: `http://localhost:3000/docs`
 
-### Auth Modul (Auth)
-- `POST /auth/register` - Pendaftaran pengguna baru (`PUBLIC`)
-- `POST /auth/login` - Autentikasi dan pembuatan token (`PUBLIC`)
-- `POST /auth/refresh` - Refresh access token (`PUBLIC`)
+---
 
-### Modul Pengguna & Alamat (User / Address)
-- `GET /user/profile` - Mengambil profil user login (`CUSTOMER`/`ANY_AUTH`)
-- `PATCH /user/profile` - Memperbarui profil (`CUSTOMER`/`ANY_AUTH`)
-- `POST /user/addresses` - Menambah alamat baru (`CUSTOMER`)
-- `GET /user/addresses` - Mengambil daftar alamat (`CUSTOMER`)
-- `GET /user/addresses/:id` - Detail alamat tertentu (`CUSTOMER`)
-- `PATCH /user/addresses/:id` - Memperbarui alamat (`CUSTOMER`)
-- `DELETE /user/addresses/:id` - Menghapus alamat (`CUSTOMER`)
-- `PATCH /user/addresses/:id/primary` - Menjadikan alamat sebagai utama (`CUSTOMER`)
+## Environment Variables
 
-### Modul Katalog & Slot (Public / Menu / Slot)
-*Public Endpoints:*
-- `GET /public/menus/active` - Daftar menu yang aktif (`PUBLIC`)
-- `GET /public/schedules` - Daftar jadwal katering (`PUBLIC`)
-- `GET /public/slots` - Daftar slot pengiriman aktif (`PUBLIC`)
-- `POST /public/coverage-check` - Pengecekan cakupan pengiriman (`PUBLIC`)
+Salin `.env.example` ke `.env` dan isi nilainya:
 
-*Admin Menu Management:*
-- `POST /admin/menus` - Menambah menu baru (`ADMIN`)
-- `GET /admin/menus` - Daftar semua menu (`ADMIN`)
-- `GET /admin/menus/:id` - Detail menu (`ADMIN`)
-- `PATCH /admin/menus/:id` - Memperbarui menu (`ADMIN`)
-- `DELETE /admin/menus/:id` - Menghapus menu (`ADMIN`)
-- `POST /admin/menu-schedules` - Menambah jadwal menu (`ADMIN`)
-- `POST /admin/menu-schedules/bulk` - Tambah jadwal menu massal (`ADMIN`)
-- `GET /admin/menu-schedules` - Lihat jadwal menu admin (`ADMIN`)
-- `DELETE /admin/menu-schedules/:id` - Hapus jadwal menu (`ADMIN`)
+```env
+# Database MySQL
+DATABASE_URL="mysql://username:password@localhost:3306/cateringin"
 
-*Admin Slot Management:*
-- `POST /admin/slots` - Menambah slot pengiriman (`ADMIN`)
-- `GET /admin/slots` - Daftar semua slot (`ADMIN`)
-- `PATCH /admin/slots/:id` - Memperbarui detail slot (`ADMIN`)
-- `DELETE /admin/slots/:id` - Menghapus slot (`ADMIN`)
+# JWT
+JWT_SECRET="your_jwt_secret_here"
 
-### Modul Keranjang & Langganan (Cart / Subscription)
-- `POST /cart/calculate` - Kalkulasi subtotal, pajak, & ongkir keranjang (`CUSTOMER`)
-- `POST /subscription/create` - Membuat langganan baru (`CUSTOMER`)
-- `GET /subscription/my` - Daftar langganan saya (`CUSTOMER`)
-- `GET /subscription/:id` - Detail langganan (`CUSTOMER`)
-- `POST /subscription/:id/skip-day` - Melewati satu hari langganan (`CUSTOMER`)
-- `POST /subscription/:id/pause` - Menghentikan sementara langganan (`CUSTOMER`)
-- `POST /subscription/:id/resume` - Melanjutkan langganan (`CUSTOMER`)
+# Louvin Payment Gateway
+LOUVIN_API_KEY="your_api_key_here"
+LOUVIN_BASE_URL="https://api.louvin.dev"
 
-### Modul Order & Payment (Louvin Integration)
-- `POST /order/checkout` - Checkout dan inisiasi pembayaran via Louvin (`CUSTOMER`)
-- `PATCH /admin/orders/:id/status` - Update status pesanan secara manual (`ADMIN`)
-- `PATCH /user/orders/:id/complete` - Konfirmasi pesanan selesai oleh pelanggan (`CUSTOMER`)
-- `GET /user/orders/:id/tracking` - Pelacakan status pesanan (`CUSTOMER`, `ADMIN`)
-- `POST /payments/louvin/callback` - Webhook untuk menerima update pembayaran Louvin (`PUBLIC/SYSTEM`)
+# Cloudinary (upload foto menu & bukti pengiriman)
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
-### Modul Dapur / KDS (Kitchen)
-- `GET /kitchen/batch-view` - Tampilan batch pesanan untuk diproses (`KITCHEN`, `ADMIN`)
-- `PATCH /kitchen/batch/start-cooking` - Memulai proses masak (`KITCHEN`, `ADMIN`)
-- `GET /kitchen/labels` - Mendapatkan daftar label masakan (`KITCHEN`, `ADMIN`)
-- `GET /kitchen/orders/:id/label` - Cetak label spesifik (`KITCHEN`, `ADMIN`)
-- `PATCH /kitchen/orders/:id/status` - Update status masakan dari dapur (`KITCHEN`, `ADMIN`)
+# Port (opsional, default 3000)
+PORT=3000
+```
 
-### Modul Pengemudi (Driver)
-- `GET /driver/deliveries` - Daftar pesanan yang harus dikirim hari ini (`DRIVER`, `ADMIN`)
-- `PATCH /driver/orders/:id/status` - Pembaruan status pengiriman di jalan (`DRIVER`, `ADMIN`)
+---
 
-### Modul Ulasan (Review)
-- `POST /user/orders/:id/review` - Memberikan ulasan/rating untuk pesanan (`CUSTOMER`)
-- `GET /public/reviews` - Mengambil ulasan publik untuk ditampilkan (`PUBLIC`)
-- `GET /admin/reviews` - Memantau seluruh ulasan pelanggan (`ADMIN`)
+## Dokumentasi API (Scalar)
 
-### Modul Admin: Analytics, Customers, & Settings
-- `GET /admin/analytics/overview` - Dashboard analitik utama (`ADMIN`)
-- `GET /admin/analytics/charts` - Data grafik untuk dashboard (`ADMIN`)
-- `GET /admin/customers` - Manajemen data pengguna/customer (`ADMIN`)
-- `GET /admin/customers/:id` - Detail data customer (`ADMIN`)
-- `PATCH /admin/customers/:id/status` - Mengaktifkan/menonaktifkan akun pengguna (`ADMIN`)
-- `GET /admin/settings` - Mengambil konfigurasi sistem (`ADMIN`)
-- `PATCH /admin/settings` - Memperbarui konfigurasi sistem (`ADMIN`)
+Setelah server berjalan, buka:
+
+```
+http://localhost:3000/docs
+```
+
+Scalar menampilkan semua endpoint secara interaktif dengan fitur **Try it out**. Gunakan endpoint `POST /auth/login` untuk mendapatkan `accessToken`, lalu masukkan ke field **Authorize** (Bearer token) di bagian atas halaman.
+
+---
+
+## Role & Hak Akses
+
+Sistem menggunakan **Role-Based Access Control (RBAC)**. Setiap request ke endpoint terproteksi harus menyertakan header:
+
+```
+Authorization: Bearer <accessToken>
+```
+
+| Role | Deskripsi |
+|---|---|
+| `PUBLIC` | Tidak perlu login — akses katalog menu, slot, dan cek jangkauan |
+| `CUSTOMER` | User yang sudah login — pesan, langganan, profil, ulasan |
+| `ADMIN` | Kelola seluruh sistem — menu, pesanan, customer, analitik, settings |
+| `KITCHEN` | Staf dapur — lihat antrian masak, update status memasak, cetak label |
+| `DRIVER` | Kurir — lihat list pengiriman, update status kirim, upload bukti |
+
+---
+
+## Alur Aplikasi
+
+### 🛒 Alur Order Reguler (Customer)
+
+```
+1. [PUBLIC]    GET  /public/menus/active       → Lihat menu hari ini
+2. [PUBLIC]    GET  /public/slots              → Pilih slot waktu
+3. [PUBLIC]    POST /public/coverage-check     → Cek jangkauan alamat
+4. [CUSTOMER]  POST /cart/calculate            → Hitung harga + ongkir
+5. [CUSTOMER]  POST /order/checkout            → Checkout → Louvin payment dibuat
+   └─ Response: { qr_string / va_number, expired_at }
+6. [SYSTEM]    POST /payments/louvin/callback  → Webhook: payment settled → Order jadi PAID
+7. [KITCHEN]   PATCH /kitchen/batch/start-cooking → Order PAID → IN_KITCHEN
+8. [DRIVER]    PATCH /driver/orders/:id/status → IN_KITCHEN → ON_DELIVERY → DELIVERED
+9. [CUSTOMER]  PATCH /user/orders/:id/complete → DELIVERED → COMPLETED
+10. [CUSTOMER] POST  /user/orders/:id/review   → Beri ulasan
+```
+
+### 📅 Alur Langganan (Subscription)
+
+```
+1. [CUSTOMER]  POST /subscription/create       → Buat langganan (durasi, slot, alamat)
+2. [CUSTOMER]  POST /order/checkout            → Checkout langganan → bayar via Louvin
+3. [SYSTEM]    POST /payments/louvin/callback  → Subscription jadi ACTIVE setelah bayar
+4. [CUSTOMER]  POST /subscription/:id/skip-day → Skip 1 hari tertentu
+5. [CUSTOMER]  POST /subscription/:id/pause    → Pause sementara
+6. [CUSTOMER]  POST /subscription/:id/resume   → Lanjutkan lagi
+```
+
+### 📊 Order Status State Machine
+
+```
+PENDING_PAYMENT → PAID → IN_KITCHEN → ON_DELIVERY → DELIVERED → COMPLETED
+                                ↓
+                           CANCELLED (+ rejectionReason wajib)
+```
+
+| Status | Siapa yang update |
+|---|---|
+| `PENDING_PAYMENT` | Sistem (saat checkout) |
+| `PAID` | Webhook Louvin (`payment.settled`) |
+| `IN_KITCHEN` | Kitchen / Admin |
+| `ON_DELIVERY` | Driver / Admin |
+| `DELIVERED` | Driver / Admin |
+| `COMPLETED` | Customer (`/user/orders/:id/complete`) |
+| `CANCELLED` | Admin (`/admin/orders/:id/status` + `rejectionReason`) atau webhook (`payment.failed`) |
+
+---
+
+## Daftar Endpoint API
+
+### 🔓 Auth
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| POST | `/auth/register` | PUBLIC | Daftar akun customer baru |
+| POST | `/auth/login` | PUBLIC | Login, dapat `accessToken` & `refreshToken` |
+| POST | `/auth/refresh` | PUBLIC | Refresh token |
+
+---
+
+### 👤 User & Alamat
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/user/profile` | ANY_AUTH | Profil user yang login |
+| PATCH | `/user/profile` | ANY_AUTH | Update nama, HP, password |
+| GET | `/user/orders` | CUSTOMER | List pesanan customer (aktif & riwayat) |
+| PATCH | `/user/orders/:id/complete` | CUSTOMER | Konfirmasi pesanan diterima |
+| GET | `/user/orders/:id/tracking` | CUSTOMER, ADMIN | Tracking status + ETA |
+| POST | `/user/orders/:id/review` | CUSTOMER | Beri ulasan (rating + komentar) |
+| POST | `/user/addresses` | CUSTOMER | Tambah alamat |
+| GET | `/user/addresses` | CUSTOMER | List semua alamat |
+| GET | `/user/addresses/:id` | CUSTOMER | Detail alamat |
+| PATCH | `/user/addresses/:id` | CUSTOMER | Edit alamat |
+| DELETE | `/user/addresses/:id` | CUSTOMER | Hapus alamat |
+| PATCH | `/user/addresses/:id/primary` | CUSTOMER | Set alamat utama |
+
+**Query params `GET /user/orders`:**
+```
+?status=PAID|IN_KITCHEN|ON_DELIVERY|DELIVERED|COMPLETED|CANCELLED
+&page=1
+&limit=10
+```
+
+---
+
+### 🌐 Public (Tanpa Login)
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/public/menus/active` | PUBLIC | Katalog menu aktif + pagination |
+| GET | `/public/schedules` | PUBLIC | Jadwal menu per tanggal |
+| GET | `/public/slots` | PUBLIC | Daftar slot pengiriman aktif |
+| POST | `/public/coverage-check` | PUBLIC | Cek jangkauan (Haversine formula) |
+| GET | `/public/reviews` | PUBLIC | Ulasan publik untuk landing page |
+
+---
+
+### 🛒 Cart & Subscription
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| POST | `/cart/calculate` | CUSTOMER | Hitung subtotal + ongkir + durasi |
+| POST | `/subscription/create` | CUSTOMER | Buat langganan baru |
+| GET | `/subscription/my` | CUSTOMER | List langganan saya |
+| GET | `/subscription/:id` | CUSTOMER | Detail langganan |
+| POST | `/subscription/:id/skip-day` | CUSTOMER | Skip 1 hari |
+| POST | `/subscription/:id/pause` | CUSTOMER | Pause langganan |
+| POST | `/subscription/:id/resume` | CUSTOMER | Resume langganan |
+
+---
+
+### 📦 Order & Payment
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| POST | `/order/checkout` | CUSTOMER | Checkout → buat order + payment Louvin |
+| POST | `/payments/louvin/callback` | SYSTEM (webhook) | Webhook dari Louvin, update status otomatis |
+
+---
+
+### 👨‍💼 Admin — Orders
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/admin/orders` | ADMIN | List semua pesanan |
+| GET | `/admin/orders/:id` | ADMIN | Detail 1 pesanan lengkap |
+| PATCH | `/admin/orders/:id/status` | ADMIN | Update status (+ `rejectionReason` wajib saat CANCELLED) |
+
+**Query params `GET /admin/orders`:**
+```
+?search=nama|email|no_pesanan
+&status=PAID|IN_KITCHEN|ON_DELIVERY|...
+&page=1
+&limit=10
+```
+
+**Body `PATCH /admin/orders/:id/status` saat batalkan:**
+```json
+{
+  "status": "CANCELLED",
+  "rejectionReason": "Alasan pembatalan wajib diisi"
+}
+```
+
+---
+
+### 👨‍💼 Admin — Menu & Jadwal
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| POST | `/admin/menus` | ADMIN | Tambah menu |
+| GET | `/admin/menus` | ADMIN | List menu + filter + pagination |
+| GET | `/admin/menus/:id` | ADMIN | Detail menu |
+| PATCH | `/admin/menus/:id` | ADMIN | Edit menu |
+| DELETE | `/admin/menus/:id` | ADMIN | Hapus menu (soft delete) |
+| POST | `/admin/menu-schedules` | ADMIN | Jadwalkan menu ke tanggal tertentu |
+| POST | `/admin/menu-schedules/bulk` | ADMIN | Jadwalkan massal beberapa tanggal |
+| GET | `/admin/menu-schedules` | ADMIN | Lihat jadwal menu |
+| DELETE | `/admin/menu-schedules/:id` | ADMIN | Hapus jadwal menu |
+
+---
+
+### 👨‍💼 Admin — Customers, Slots, Analytics, Settings
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/admin/customers` | ADMIN | List customer + search + pagination |
+| GET | `/admin/customers/:id` | ADMIN | Detail customer + riwayat pesanan |
+| PATCH | `/admin/customers/:id/status` | ADMIN | Aktif/nonaktif akun |
+| POST | `/admin/slots` | ADMIN | Tambah slot waktu |
+| GET | `/admin/slots` | ADMIN | List slot |
+| PATCH | `/admin/slots/:id` | ADMIN | Edit slot |
+| DELETE | `/admin/slots/:id` | ADMIN | Hapus slot |
+| GET | `/admin/analytics/overview` | ADMIN | Metrik dashboard (revenue, pesanan, dll) |
+| GET | `/admin/analytics/charts` | ADMIN | Data grafik per periode |
+| GET | `/admin/reviews` | ADMIN | Semua ulasan + search |
+| GET | `/admin/settings` | ADMIN | Konfigurasi sistem (biaya, lokasi dapur) |
+| PATCH | `/admin/settings` | ADMIN | Update konfigurasi |
+
+---
+
+### 🍳 Kitchen (KDS)
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/kitchen/batch-view` | KITCHEN, ADMIN | Antrian masak per tanggal & slot |
+| PATCH | `/kitchen/batch/start-cooking` | KITCHEN, ADMIN | Batch PAID → IN_KITCHEN |
+| GET | `/kitchen/labels` | KITCHEN, ADMIN | Label kemasan untuk dicetak |
+| GET | `/kitchen/orders/:id/label` | KITCHEN, ADMIN | Label 1 pesanan |
+| PATCH | `/kitchen/orders/:id/status` | KITCHEN, ADMIN | Update status masak |
+
+---
+
+### 🚚 Driver
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/driver/deliveries` | DRIVER, ADMIN | Daftar pengiriman hari ini |
+| PATCH | `/driver/orders/:id/status` | DRIVER, ADMIN | Update `ON_DELIVERY` / `DELIVERED` |
+| POST | `/driver/upload-proof` | DRIVER, ADMIN | Upload foto bukti pengiriman |
+
+---
+
+### 📤 Upload
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| POST | `/upload/image` | ADMIN | Upload foto menu ke Cloudinary |
+
+**Request:** `multipart/form-data`, field `file` (max 5MB, hanya image).
+**Response:** `{ data: { url: "https://res.cloudinary.com/..." } }`
+
+---
+
+## Struktur Response
+
+Semua endpoint mengembalikan envelope yang konsisten:
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Pesan deskriptif",
+  "data": { ... }
+}
+```
+
+Untuk list dengan pagination:
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "...",
+  "data": [...],
+  "meta": {
+    "total": 100,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 10
+  }
+}
+```
+
+Error response:
+
+```json
+{
+  "success": false,
+  "statusCode": 400,
+  "message": "Pesan error yang deskriptif"
+}
+```
+
+---
+
+## Mapping ke Frontend
+
+Tabel berikut menunjukkan koneksi antara halaman FE dan endpoint BE:
+
+| Halaman FE | File FE | Endpoint BE |
+|---|---|---|
+| Landing Page | `LandingPage.jsx` | `GET /public/menus/active`, `GET /public/reviews` |
+| Menu / Katalog | `MenuPage.jsx` | `GET /public/menus/active`, `GET /public/schedules`, `GET /public/slots` |
+| Login | `LoginPage.jsx` | `POST /auth/login` |
+| Register | `RegisterPage.jsx` | `POST /auth/register` |
+| Checkout | `CheckoutPage.jsx` | `POST /public/coverage-check`, `POST /cart/calculate`, `POST /order/checkout` |
+| Pesanan Aktif | `PesananPage.jsx` | `GET /user/orders?status=PAID,IN_KITCHEN,ON_DELIVERY` |
+| Riwayat | `RiwayatPage.jsx` | `GET /user/orders?status=COMPLETED,CANCELLED` |
+| Profil | `ProfilePage.jsx` | `GET /user/profile`, `PATCH /user/profile` |
+| Admin Dashboard | `AdminDashboardPage.jsx` | `GET /admin/analytics/overview` |
+| Admin Pesanan | `AdminOrdersPage.jsx` | `GET /admin/orders`, `PATCH /admin/orders/:id/status` |
+| Admin Detail Pesanan | `AdminOrderDetailPage.jsx` | `GET /admin/orders/:id`, `PATCH /admin/orders/:id/status` |
+| Admin Menu | `AdminMenuPage.jsx` | `GET/POST/PATCH/DELETE /admin/menus` |
+| Admin Slots | `AdminSlotsPage.jsx` | `GET/POST/PATCH/DELETE /admin/slots` |
+| Admin Customers | `AdminCustomersPage.jsx` | `GET /admin/customers`, `PATCH /admin/customers/:id/status` |
+| Admin Reviews | `AdminReviewsPage.jsx` | `GET /admin/reviews` |
+| Admin Reports | `AdminReportsPage.jsx` | `GET /admin/analytics/overview`, `GET /admin/analytics/charts` |
+
+---
+
+## Database & Prisma
+
+### Schema Utama
+
+```
+User → Address, Order, Subscription, Review
+Order → OrderItem, Payment, Review, DeliverySlot, Address
+Subscription → SubscriptionSkip, Order, DeliverySlot, Address
+Menu → DailyMenuSchedule, OrderItem
+Payment → Order
+SystemSetting (id=1, singleton)
+```
+
+### Perintah Prisma Berguna
+
+```bash
+# Generate Prisma Client (setelah edit schema.prisma)
+npx prisma generate
+
+# Buat & jalankan migrasi baru
+npx prisma migrate dev --name nama_migrasi
+
+# Reset database (hati-hati: menghapus semua data!)
+npx prisma migrate reset
+
+# Buka Prisma Studio (GUI database)
+npx prisma studio
+
+# Push schema ke DB tanpa membuat file migrasi (dev only)
+npx prisma db push
+```
+
+### Migrasi yang Perlu Dijalankan
+
+Setelah project ini di-clone dan DB sudah siap:
+
+```bash
+npx prisma migrate dev
+```
+
+Ini akan menjalankan semua migrasi termasuk penambahan kolom `rejectionReason` pada tabel `Order`.
+
