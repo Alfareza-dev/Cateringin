@@ -18,6 +18,7 @@ import { KitchenModule } from './modules/kitchen/kitchen.module';
 import { DriverModule } from './modules/driver/driver.module';
 import { ReviewModule } from './modules/review/review.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AdminModule } from './modules/admin/admin.module';
     DriverModule,
     ReviewModule,
     AdminModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
