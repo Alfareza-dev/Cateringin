@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UserOrdersQueryDto } from './dto/user-orders-query.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -64,5 +65,54 @@ export class UserService {
 
     const { password, ...result } = updatedUser;
     return result;
+  }
+
+  async getOrders(userId: string, query: UserOrdersQueryDto) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const skip = (page - 1) * limit;
+
+    const where: any = { userId };
+    if (query.status) {
+      where.status = query.status;
+    }
+
+    const [total, orders] = await Promise.all([
+      this.prisma.order.count({ where }),
+      this.prisma.order.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          items: {
+            include: {
+              menu: {
+                select: { id: true, name: true, imageUrl: true },
+              },
+            },
+          },
+          slot: {
+            select: { id: true, name: true, startTime: true, endTime: true },
+          },
+          address: {
+            select: { id: true, label: true, fullAddress: true },
+          },
+          payment: {
+            select: { id: true, status: true, amount: true, paidAt: true },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      data: orders,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 }

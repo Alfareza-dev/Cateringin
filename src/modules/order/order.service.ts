@@ -198,11 +198,18 @@ export class OrderService {
     const order = await this.prisma.order.findUnique({ where: { id } });
     if (!order) throw new NotFoundException('Order not found');
 
-    // Admin can update to any valid status, but let's enforce some basic sanity if needed
-    // For now, accept what the admin says
+    // Saat membatalkan pesanan, alasan penolakan wajib diisi
+    if (dto.status === OrderStatus.CANCELLED && !dto.rejectionReason?.trim()) {
+      throw new BadRequestException('rejectionReason wajib diisi saat membatalkan pesanan');
+    }
+
     return this.prisma.order.update({
       where: { id },
-      data: { status: dto.status, proofOfDelivery: dto.proofOfDelivery },
+      data: {
+        status: dto.status,
+        proofOfDelivery: dto.proofOfDelivery,
+        rejectionReason: dto.status === OrderStatus.CANCELLED ? dto.rejectionReason?.trim() : undefined,
+      },
     });
   }
 

@@ -7,8 +7,13 @@ export class UpdateOrderStatusDto {
   @IsEnum(OrderStatus)
   status: OrderStatus;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'URL bukti pengantaran (untuk driver)' })
   @IsString()
   @IsOptional()
   proofOfDelivery?: string;
+
+  @ApiPropertyOptional({ description: 'Alasan penolakan / pembatalan pesanan (wajib saat status CANCELLED)' })
+  @IsString()
+  @IsOptional()
+  rejectionReason?: string;
 }

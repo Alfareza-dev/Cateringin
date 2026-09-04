@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { OrderStatus } from '@prisma/client';
 
 export enum AnalyticsPeriod {
   DAILY = 'daily',
@@ -114,4 +115,30 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   businessAddress?: string;
+}
+
+export class AdminOrdersQueryDto {
+  @ApiPropertyOptional({ description: 'Cari berdasarkan nomor pesanan, nama, atau email customer' })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({ enum: OrderStatus, description: 'Filter berdasarkan status pesanan' })
+  @IsOptional()
+  @IsEnum(OrderStatus)
+  status?: OrderStatus;
+
+  @ApiPropertyOptional({ description: 'Page number', example: 1 })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ description: 'Items per page', example: 10 })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
+  @Min(1)
+  limit?: number = 10;
 }
