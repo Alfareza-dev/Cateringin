@@ -69,18 +69,41 @@ export class OrderService {
       totalPrice = cartResult.totalPrice;
     } else {
       // Direct items checkout
-      if (!actualDeliveryMethod || !actualSlotId) {
-        throw new BadRequestException(
-          'deliveryMethod and slotId are required for direct orders',
-        );
+      // --- Auto-resolve deliveryMethod: default PICKUP jika tidak dikirim ---
+      if (!actualDeliveryMethod) {
+        actualDeliveryMethod = DeliveryMethod.PICKUP;
       }
+
+      // --- Auto-resolve slotId: ambil slot aktif pertama jika tidak dikirim ---
+      if (!actualSlotId) {
+        const firstSlot = await this.prisma.deliverySlot.findFirst({
+          where: { isActive: true },
+          orderBy: { startTime: 'asc' },
+        });
+        if (!firstSlot) {
+          throw new BadRequestException(
+            'Tidak ada slot pengiriman aktif. Silakan hubungi admin.',
+          );
+        }
+        actualSlotId = firstSlot.id;
+      }
+
+      // addressId wajib hanya untuk DELIVERY
       if (
         actualDeliveryMethod === DeliveryMethod.DELIVERY &&
         !actualAddressId
       ) {
-        throw new BadRequestException(
-          'addressId is required for DELIVERY method',
-        );
+        // Coba ambil alamat utama user secara otomatis
+        const primaryAddress = await this.prisma.address.findFirst({
+          where: { userId, isPrimary: true },
+        });
+        if (primaryAddress) {
+          actualAddressId = primaryAddress.id;
+        } else {
+          throw new BadRequestException(
+            'addressId wajib diisi untuk metode DELIVERY. Tambahkan alamat di profil terlebih dahulu.',
+          );
+        }
       }
 
       // Calculate items price
@@ -109,6 +132,7 @@ export class OrderService {
       }
       totalPrice = subtotal + deliveryFee;
     }
+
 
     const orderNumber = this.generateOrderNumber();
 

@@ -34,7 +34,7 @@ export class MenuService {
 
     const skip = (page - 1) * limit;
 
-    const [data, total] = await Promise.all([
+    const [menus, total] = await Promise.all([
       this.prisma.menu.findMany({
         where,
         skip,
@@ -43,6 +43,12 @@ export class MenuService {
       }),
       this.prisma.menu.count({ where }),
     ]);
+
+    const data = menus.map((menu) => ({
+      ...menu,
+      price: Number(menu.price),
+      image: menu.imageUrl,
+    }));
 
     return {
       data,
@@ -62,7 +68,7 @@ export class MenuService {
     if (!menu) {
       throw new NotFoundException(`Menu with ID ${id} not found`);
     }
-    return menu;
+    return { ...menu, price: Number(menu.price), image: menu.imageUrl };
   }
 
   async update(id: string, updateMenuDto: UpdateMenuDto) {

@@ -16,7 +16,7 @@ export class PublicService {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
-    const [data, total] = await Promise.all([
+    const [menus, total] = await Promise.all([
       this.prisma.menu.findMany({
         where: { isActive: true },
         skip,
@@ -25,6 +25,14 @@ export class PublicService {
       }),
       this.prisma.menu.count({ where: { isActive: true } }),
     ]);
+
+    // Map: tambah field `image` sebagai alias `imageUrl` agar kompatibel dengan FE
+    const data = menus.map((menu) => ({
+      ...menu,
+      price: Number(menu.price),
+      image: menu.imageUrl,       // FE MenuPage pakai menu.image
+      imageUrl: menu.imageUrl,    // Tetap sertakan imageUrl untuk backward compat
+    }));
 
     return {
       data,
@@ -36,6 +44,7 @@ export class PublicService {
       },
     };
   }
+
 
   async getSchedules(filterDto: GetScheduleFilterDto) {
     const { startDate, endDate } = filterDto;
