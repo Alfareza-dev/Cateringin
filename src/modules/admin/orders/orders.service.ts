@@ -14,8 +14,18 @@ export class AdminOrdersService {
 
     const where: Prisma.OrderWhereInput = {};
 
-    if (query.status) {
-      where.status = query.status;
+    // Parse status: bisa satu nilai (PAID) atau beberapa dipisah koma (PAID,IN_KITCHEN)
+    if (query.status && query.status !== 'ALL') {
+      const statusList = query.status
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean) as any[];
+
+      if (statusList.length === 1) {
+        where.status = statusList[0];
+      } else if (statusList.length > 1) {
+        where.status = { in: statusList };
+      }
     }
 
     if (query.search) {
@@ -27,6 +37,7 @@ export class AdminOrdersService {
         { user: { phone: { contains: q } } },
       ];
     }
+
 
     const [total, orders] = await Promise.all([
       this.prisma.order.count({ where }),

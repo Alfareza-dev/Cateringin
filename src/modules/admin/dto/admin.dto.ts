@@ -123,10 +123,14 @@ export class AdminOrdersQueryDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: OrderStatus, description: 'Filter berdasarkan status pesanan' })
+  @ApiPropertyOptional({
+    description:
+      'Filter status: bisa satu nilai (PAID) atau beberapa dipisah koma (PAID,IN_KITCHEN). Gunakan ALL untuk semua.',
+    example: 'PAID,IN_KITCHEN',
+  })
   @IsOptional()
-  @IsEnum(OrderStatus)
-  status?: OrderStatus;
+  @IsString()
+  status?: string; // Akan diparse menjadi array di service
 
   @ApiPropertyOptional({ description: 'Page number', example: 1 })
   @IsOptional()
