@@ -77,12 +77,28 @@ export class AdminAnalyticsService {
       },
     });
 
+    // Breakdown status pesanan secara real-time dari database
+    const [newOrdersCount, inKitchenCount, onDeliveryCount, deliveredCount, completedCount] =
+      await Promise.all([
+        this.prisma.order.count({ where: { status: OrderStatus.PAID } }),
+        this.prisma.order.count({ where: { status: OrderStatus.IN_KITCHEN } }),
+        this.prisma.order.count({ where: { status: OrderStatus.ON_DELIVERY } }),
+        this.prisma.order.count({ where: { status: OrderStatus.DELIVERED } }),
+        this.prisma.order.count({ where: { status: OrderStatus.COMPLETED } }),
+      ]);
+
     return {
       period: query.period,
       totalRevenue: Number(revenueResult._sum.totalPrice || 0),
       activeSubscribers,
       totalOrders,
       urgentAlertsCount,
+      statusCounts: {
+        new: newOrdersCount,
+        inKitchen: inKitchenCount,
+        onDelivery: onDeliveryCount,
+        done: deliveredCount + completedCount,
+      },
     };
   }
 

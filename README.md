@@ -243,6 +243,7 @@ PENDING_PAYMENT → PAID → IN_KITCHEN → ON_DELIVERY → DELIVERED → COMPLE
 | GET | `/admin/orders` | ADMIN | List semua pesanan |
 | GET | `/admin/orders/:id` | ADMIN | Detail 1 pesanan lengkap |
 | PATCH | `/admin/orders/:id/status` | ADMIN | Update status (+ `rejectionReason` wajib saat CANCELLED) |
+| PATCH | `/admin/orders/batch-status` | ADMIN | Update status beberapa pesanan sekaligus (batch) |
 
 **Query params `GET /admin/orders`:**
 ```
@@ -292,6 +293,7 @@ PENDING_PAYMENT → PAID → IN_KITCHEN → ON_DELIVERY → DELIVERED → COMPLE
 | GET | `/admin/analytics/overview` | ADMIN | Metrik dashboard (revenue, pesanan, dll) |
 | GET | `/admin/analytics/charts` | ADMIN | Data grafik per periode |
 | GET | `/admin/reviews` | ADMIN | Semua ulasan + search |
+| DELETE | `/admin/reviews/:id` | ADMIN | Hapus ulasan |
 | GET | `/admin/settings` | ADMIN | Konfigurasi sistem (biaya, lokasi dapur) |
 | PATCH | `/admin/settings` | ADMIN | Update konfigurasi |
 

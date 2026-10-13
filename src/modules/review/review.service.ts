@@ -143,4 +143,18 @@ export class ReviewService {
       },
     };
   }
+
+  async deleteReview(id: string) {
+    const review = await this.prisma.review.findUnique({ where: { id } });
+    if (!review) {
+      throw new NotFoundException(`Ulasan dengan id "${id}" tidak ditemukan`);
+    }
+
+    await this.prisma.review.delete({ where: { id } });
+
+    return {
+      id,
+      message: 'Ulasan berhasil dihapus',
+    };
+  }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { OrderStatus } from '@prisma/client';
 
@@ -145,4 +145,30 @@ export class AdminOrdersQueryDto {
   @IsInt()
   @Min(1)
   limit?: number = 10;
+}
+
+export class BatchUpdateOrderStatusDto {
+  @ApiProperty({
+    description: 'Daftar ID pesanan yang akan diupdate',
+    example: ['0d588506-69d8-4f81-8e9a-5f33f6df2881', 'b3fa73f3-9366-4d24-8186-bceee4c02231'],
+  })
+  @IsArray()
+  @IsString({ each: true })
+  orderIds: string[];
+
+  @ApiProperty({
+    enum: OrderStatus,
+    description: 'Status target untuk pesanan-pesanan tersebut',
+    example: OrderStatus.IN_KITCHEN,
+  })
+  @IsEnum(OrderStatus)
+  status: OrderStatus;
+
+  @ApiPropertyOptional({
+    description: 'Alasan penolakan jika status diubah ke CANCELLED',
+    example: 'Kapasitas dapur sudah penuh untuk slot waktu ini',
+  })
+  @IsOptional()
+  @IsString()
+  rejectionReason?: string;
 }

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { AdminOrdersQueryDto } from '../dto/admin.dto';
-import { Prisma } from '@prisma/client';
+import { AdminOrdersQueryDto, BatchUpdateOrderStatusDto } from '../dto/admin.dto';
+import { OrderStatus, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AdminOrdersService {
@@ -122,5 +122,31 @@ export class AdminOrdersService {
     }
 
     return order;
+  }
+
+  async batchUpdateStatus(dto: BatchUpdateOrderStatusDto) {
+    const { orderIds, status, rejectionReason } = dto;
+    if (!orderIds || orderIds.length === 0) {
+      return { updatedCount: 0, status };
+    }
+
+    const data: Prisma.OrderUpdateManyMutationInput = {
+      status,
+    };
+    if (status === OrderStatus.CANCELLED && rejectionReason) {
+      data.rejectionReason = rejectionReason;
+    }
+
+    const result = await this.prisma.order.updateMany({
+      where: {
+        id: { in: orderIds },
+      },
+      data,
+    });
+
+    return {
+      updatedCount: result.count,
+      status,
+    };
   }
 }

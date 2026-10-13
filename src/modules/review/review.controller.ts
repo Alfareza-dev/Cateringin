@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewService } from './review.service';
 import { CreateReviewDto, PublicReviewQueryDto, AdminReviewQueryDto } from './dto/review.dto';
@@ -38,5 +38,20 @@ export class ReviewController {
   @ApiOperation({ summary: 'Admin: Get a paginated list of all reviews with search' })
   async getAdminReviews(@Query() query: AdminReviewQueryDto) {
     return this.reviewService.getAdminReviews(query);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Delete('admin/reviews/:id')
+  @ApiOperation({ summary: 'Admin: Delete a review by ID' })
+  async deleteReview(@Param('id') id: string) {
+    const data = await this.reviewService.deleteReview(id);
+    return {
+      success: true,
+      statusCode: 200,
+      message: 'Ulasan berhasil dihapus',
+      data,
+    };
   }
 }

@@ -1,7 +1,7 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminOrdersService } from './orders.service';
-import { AdminOrdersQueryDto } from '../dto/admin.dto';
+import { AdminOrdersQueryDto, BatchUpdateOrderStatusDto } from '../dto/admin.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
@@ -14,6 +14,23 @@ import { Role } from '@prisma/client';
 @Controller('admin/orders')
 export class AdminOrdersController {
   constructor(private readonly adminOrdersService: AdminOrdersService) {}
+
+  /**
+   * PATCH /admin/orders/batch-status
+   * Update status beberapa pesanan sekaligus (batch)
+   */
+  @Patch('batch-status')
+  @ApiOperation({ summary: 'Admin: Update status beberapa pesanan sekaligus (Batch)' })
+  @ApiResponse({ status: 200, description: 'Batch update status berhasil' })
+  async batchUpdateStatus(@Body() dto: BatchUpdateOrderStatusDto) {
+    const result = await this.adminOrdersService.batchUpdateStatus(dto);
+    return {
+      success: true,
+      statusCode: 200,
+      message: `${result.updatedCount} pesanan berhasil diubah status menjadi ${result.status}`,
+      data: result,
+    };
+  }
 
   /**
    * GET /admin/orders
